@@ -27,3 +27,34 @@
      {:name "left-achilles" :size 1}
      {:name "left-foot" :size 2}
      ])
+
+
+(defn matching-part [part]
+  {:name (clojure.string/replace (:name part) #"^left-" "rigth-")
+   :size (:size part)})
+
+ (defn symmetrize-body-parts
+   "Expects a seq of maps that have a :name and :size"
+   [asym-body-parts]
+   (reduce (fn [final-body-parts part]
+             (into final-body-parts (set [part (matching-part part)])))
+           []
+           asym-body-parts))
+
+
+(defn hit
+  "Hit hobbit"
+  [asym-body-parts]
+  (let [sym-body-parts (symmetrize-body-parts asym-body-parts)
+        body-sum (reduce + (map :size sym-body-parts))
+        target (rand body-sum)]
+    (loop [[part & remaining] sym-body-parts
+            accumulated-sum (:size part)]
+      (if (>= accumulated-sum target)
+        part
+        (recur remaining (+ accumulated-sum (:size (first remaining))))))))
+
+(defn hit-string
+  [asym-body-parts]
+  (str "Hobbit was hitted to "
+    (:name (hit asym-body-parts))))
